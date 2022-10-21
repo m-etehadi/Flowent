@@ -15,14 +15,14 @@ namespace Flowent
         public Initializer(CommandBuilder<TCommand> currentCommandBuilder)
         {
             _currentCommandBuilder = currentCommandBuilder;
-            _actionInitializer = () => new Command();
+            _actionInitializer = () => new TCommand();
         }
 
         public CommandBuilder<TCommand> By(params Action<TCommand>[] initializers)
         {
             this._actionInitializer = () =>
             {
-                var result = new Command();
+                var result = new TCommand();
                 initializers.ToList().ForEach(p => p.Invoke(result));
                 return result;
             };

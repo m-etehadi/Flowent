@@ -16,8 +16,8 @@ namespace Flowent
 
 
         CommandBuilder<TCommand> _currentAction;
-        private List<ValidatorValidatorActionPair<TCommand>> _validatorsIsNot;
-        private List<ValidatorValidatorActionPair<TCommand>> _validatorsIs;
+        private List<ValidatorActionPair<TCommand>> _validatorsIsNot;
+        private List<ValidatorActionPair<TCommand>> _validatorsIs;
         
 
         public CommandBuilder<TCommand> EndValidate => _currentAction;
@@ -27,29 +27,27 @@ namespace Flowent
         internal Validator(CommandBuilder<TCommand> currentAction)
         {
             _currentAction = currentAction;
-            _validatorsIsNot = new List<ValidatorValidatorActionPair<TCommand>>();
-            _validatorsIs = new List<ValidatorValidatorActionPair<TCommand>>();
+            _validatorsIsNot = new List<ValidatorActionPair<TCommand>>();
+            _validatorsIs = new List<ValidatorActionPair<TCommand>>();
         }
 
         public ValidatorAction<TCommand> IfIsNot(params Func<TCommand, bool>[] validator)
         {
-            var validatorValidatorActionPair = new ValidatorValidatorActionPair<TCommand>(validator, new ValidatorAction<TCommand>(this));
-            _validatorsIsNot.Add(validatorValidatorActionPair);
+            var validatorActionPair = new ValidatorActionPair<TCommand>(validator, new ValidatorAction<TCommand>(this));
+            _validatorsIsNot.Add(validatorActionPair);
 
-            return validatorValidatorActionPair.Action;
+            return validatorActionPair.Action;
         }
         public ValidatorAction<TCommand> If(params Func<TCommand, bool>[] validator)
         {
-            var validatorValidatorActionPair = new ValidatorValidatorActionPair(validator, new ValidatorAction<TCommand>(this));
-            _validatorsIs.Add(validatorValidatorActionPair);
+            var validatorActionPair = new ValidatorActionPair<TCommand>(validator, new ValidatorAction<TCommand>(this));
+            _validatorsIs.Add(validatorActionPair);
 
-            return validatorValidatorActionPair.Action;
+            return validatorActionPair.Action;
         }
 
         public AggregateException Run(TCommand cmd)
         {
-
-            var a=_validatorsIsNot.Select(p => Task.Run<bool>(() => p.Validators(cmd)));
             List<Exception> resultIsNotValidators = _validatorsIsNot.Where(p => p.Validators.Any(validator => validator(cmd) == false))
                 .Select(p => p.Action.Run(cmd))
                 .ToList();
@@ -61,12 +59,12 @@ namespace Flowent
             return new AggregateException(resultIsValidators.Union(resultIsNotValidators));
         }
 
-        private class ValidatorValidatorActionPair<TCommand> where TCommand : ICommand, new()
+        private class ValidatorActionPair<TCommand> where TCommand : ICommand, new()
         {
             public Func<TCommand, bool>[] Validators { get; init; }
             public ValidatorAction<TCommand> Action { get; init; }
 
-            public ValidatorValidatorActionPair(Func<TCommand, bool>[] validators, ValidatorAction<TCommand> action)
+            public ValidatorActionPair(Func<TCommand, bool>[] validators, ValidatorAction<TCommand> action)
             {
                 Validators = validators;
                 Action = action;
