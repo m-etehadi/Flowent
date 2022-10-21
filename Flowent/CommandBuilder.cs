@@ -56,7 +56,24 @@ namespace Flowent
         {
             var commandInstance = Init.Run();
 
-            //var validatorException = _validators.condi
+            // validate
+            var validatorException = _validators.Run(commandInstance);
+            if (validatorException != null)
+            {
+                throw validatorException;
+            }
+
+            // run
+            try
+            {
+                commandInstance.Execute();
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
+
 
         }
     }

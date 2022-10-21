@@ -8,22 +8,22 @@ namespace Flowent
 {
     public class ConditionalBuilder<TCommand> where TCommand : ICommand, new()
     {
-        ConditionalBuilder<TCommand> _else;
+        ConditionalBuilder<TCommand>? _else;
         CommandBuilder<TCommand> _currentAction;
-        public CommandBuilder DoAction { private get; set; }
-        public Func<TCommand, bool> Condition { private get; set; }
+        CommandBuilder? _doAction;
+        Func<TCommand, bool> _condition;
 
 
 
         public ConditionalBuilder(CommandBuilder<TCommand> currentAction, Func<TCommand, bool> condition)
         {
             _currentAction = currentAction;
-            Condition = condition;
+            _condition = condition;
         }
 
         public ConditionalBuilder<TCommand> Run<NextCommand>(CommandBuilder<NextCommand> nextCommand) where NextCommand : ICommand, new()
         {
-            this.DoAction = nextCommand;
+            _doAction = nextCommand;
             return this;
         }
 
