@@ -9,16 +9,16 @@ namespace Flowent
 {
     public class Validator<TCommand> where TCommand : ICommand, new()
     {
-        CommandBuilder<TCommand> _currentAction;
+        FlowBuilder<TCommand> _currentAction;
         private List<ValidatorActionPair> _validatorsIsNot;
         private List<ValidatorActionPair> _validatorsIs;
 
 
-        public CommandBuilder<TCommand> EndValidate => _currentAction;
+        public FlowBuilder<TCommand> EndValidate => _currentAction;
 
 
 
-        internal Validator(CommandBuilder<TCommand> currentAction)
+        internal Validator(FlowBuilder<TCommand> currentAction)
         {
             _currentAction = currentAction;
             _validatorsIsNot = new List<ValidatorActionPair>();
@@ -46,7 +46,7 @@ namespace Flowent
                 .Select(p => p.Action.Run(cmd))
                 .ToList();
 
-            List<Exception> resultIsValidators = _validatorsIs.Where(p => p.Validators.Any(validator => validator(cmd) == false))
+            List<Exception> resultIsValidators = _validatorsIs.Where(p => p.Validators.Any(validator => validator(cmd)))
                 .Select(p => p.Action.Run(cmd))
                 .ToList();
 

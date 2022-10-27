@@ -9,16 +9,16 @@ namespace Flowent
     public class Initializer<TCommand> where TCommand : ICommand, new()
     {
         Func<TCommand> _actionInitializer;
-        readonly CommandBuilder<TCommand> _currentCommandBuilder;
+        readonly FlowBuilder<TCommand> _currentCommandBuilder;
 
         // Methods
-        public Initializer(CommandBuilder<TCommand> currentCommandBuilder)
+        public Initializer(FlowBuilder<TCommand> currentCommandBuilder)
         {
             _currentCommandBuilder = currentCommandBuilder;
             _actionInitializer = () => new TCommand();
         }
 
-        public CommandBuilder<TCommand> By(params Action<TCommand>[] initializers)
+        public FlowBuilder<TCommand> By(params Action<TCommand>[] initializers)
         {
             this._actionInitializer = () =>
             {
@@ -30,7 +30,7 @@ namespace Flowent
             return _currentCommandBuilder;
         }
 
-        public CommandBuilder<TCommand> By(Func<TCommand> initializer)
+        public FlowBuilder<TCommand> By(Func<TCommand> initializer)
         {
             this._actionInitializer = initializer;
             return _currentCommandBuilder;

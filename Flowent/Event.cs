@@ -8,11 +8,11 @@ namespace Flowent
 {
     public class Event<TCommand> where TCommand : ICommand, new()
     {
-        CommandBuilder<TCommand> _currentAction;
+        FlowBuilder<TCommand> _currentAction;
         List<Func<TCommand, Task>> _onExecuted;
         List<(Type exceptionType, Func<TCommand, Exception, Task> handler)> _onException;
 
-        public CommandBuilder<TCommand> EndOn => this._currentAction;
+        public FlowBuilder<TCommand> EndOn => this._currentAction;
 
         //Methods
 
@@ -22,17 +22,19 @@ namespace Flowent
             {
                 await commandInstance.Execute();
             }
-            catch (Exception ex)
+            catch (Exception exception)
             {
-                _onException.Where(e => e.exceptionType.Equals(ex.GetType()))
-                    .ToList()
-                    .ForEach(async e => await e.handler(commandInstance, ex));
+                await Task.WhenAll(
+                   _onException
+                   .Where(e => e.exceptionType.IsAssignableFrom(exception.GetType()))
+                   .Select(e => e.handler(commandInstance, exception))
+               );
             }
 
-            _onExecuted.ForEach(e => e(commandInstance));
+            await Task.WhenAll(_onExecuted.Select(e => e(commandInstance)));
         }
 
-        internal Event(CommandBuilder<TCommand> currentAction)
+        internal Event(FlowBuilder<TCommand> currentAction)
         {
             _currentAction = currentAction;
             _onExecuted = new List<Func<TCommand, Task>>();
@@ -83,5 +85,7 @@ namespace Flowent
 
             return this;
         }
+
+
     }
 }
