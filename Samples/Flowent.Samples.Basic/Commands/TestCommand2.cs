@@ -8,8 +8,8 @@ namespace Flowent.Samples.Basic.Commands
 {
     public class TestCommand2 : ICommand
     {
-        public int IntProp2 { get; set; }
-        public string Status2 { get; set; }
+        public int IntProp { get; set; }
+        public string Status { get; set; }
 
 
         public Task Execute()

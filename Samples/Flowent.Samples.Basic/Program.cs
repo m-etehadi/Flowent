@@ -32,13 +32,13 @@ var command = new FlowBuilder<TestCommand>()
    .EndThen
    .If(cmd => cmd.IntProp == 11)
        .Do<TestCommand2>(new FlowBuilder<TestCommand2>()
-                                .Init.By(p => p.Status2 = "Init2"))
+                                .Init.By(p => p.Status = "Init2"))
    .ElseIf(p => true)
        .Do<TestCommand2>(new FlowBuilder<TestCommand2>()
                                 .Init.By(() => new TestCommand2
                                 {
-                                    IntProp2 = 12,
-                                    Status2 = "Else condition",
+                                    IntProp = 12,
+                                    Status = "Else condition",
                                 }))
    .EndIf;
 

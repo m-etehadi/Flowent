@@ -4,10 +4,8 @@ namespace Flowent.Samples.Basic.Commands
 {
     public class TestCommand : ICommand
     {
-        // INPUT/OUTPUT value
         public int IntProp { get; set; }
 
-        // INPUT value
         public string Status { get; set; }
 
         // OUTPUT value

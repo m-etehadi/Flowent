@@ -59,7 +59,7 @@ namespace Flowent
             return conditionalNextAction;
         }
 
-        public override async Task Run()
+        public override async Task<TCommand> Run()
         {
             var commandInstance = Init.Run();
 
@@ -76,7 +76,7 @@ namespace Flowent
             // conditions
             Task.WaitAll(_conditionalNextActions.Select(p => p.Run(commandInstance)).ToArray());
 
-
+            return commandInstance;
 
         }
     }
