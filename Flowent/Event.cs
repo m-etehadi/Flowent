@@ -21,6 +21,7 @@ namespace Flowent
             try
             {
                 await commandInstance.Execute();
+                await Task.WhenAll(_onExecuted.Select(e => e(commandInstance)));
             }
             catch (Exception exception)
             {
@@ -30,8 +31,6 @@ namespace Flowent
                    .Select(e => e.handler(commandInstance, exception))
                );
             }
-
-            await Task.WhenAll(_onExecuted.Select(e => e(commandInstance)));
         }
 
         internal Event(FlowBuilder<TCommand> currentAction)
