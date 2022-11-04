@@ -36,6 +36,6 @@ namespace Flowent
             return _currentCommandBuilder;
         }
 
-        public TCommand Run() => _actionInitializer();
+        internal TCommand Run() => _actionInitializer();
     }
 }

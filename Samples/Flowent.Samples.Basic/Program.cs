@@ -14,7 +14,7 @@ var context = new SomeContext()
 
 
 
-var command = new FlowBuilder<TestCommand>()
+var command = new FlowBuilder<TestCommand1>()
    .Init.By(cmd => cmd.IntProp = 2, p => p.Status = "3")
    .Validate
        .IfIsNot(cmd => cmd.Status == "3").Throw(cmd => new Exception("Status must be '3'"))

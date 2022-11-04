@@ -5,23 +5,27 @@ Test basic functions of FlowBuilder class
 
 
 Scenario: Test initialization step
-	Given define initialization for the created FlowBuilder instance
-	* define some validation for the created FlowBuilder instance
-	When run flow instance of FlowBuilder<TestCommand>
+	Given initialization step is defined for the FlowBuilder instance
+	* some validations are defined for the created FlowBuilder instance
+	When running the FlowBuilder<TestCommand> instance
 	Then the TestCommand should be initialized
 	* the TestCommand properties must be validated before exectuion
 	* the TestCommand should be executed successfully
 
 Scenario: Test validation step
-	Given define initialization for the created FlowBuilder instance
-	* define some invalid validation for the created FlowBuilder instance
-	When run flow instance of FlowBuilder<TestCommand>
+	Given initialization step is defined for the FlowBuilder instance
+	* some invalid validations are defined for the created FlowBuilder instance
+	When running the FlowBuilder<TestCommand> instance
 	Then validation handler prevents exectuion, because the TestCommand properties are not valid
 	* the TestCommand cannot be executed
 
-
-
 Scenario: Test onExectured event handler step
-	Given define an onExecuted event handler
-	When run flow instance of FlowBuilder<TestCommand>
+	Given an onExecuted event handler is defined
+	When running the FlowBuilder<TestCommand> instance
 	Then check if the onExecuted event handler is executed
+
+Scenario: Test onException event handler
+	Given an Exception handler is defined
+	* test command is Initialized in a way that causes an error
+	When running the FlowBuilder<TestCommand> instance
+	Then check if the onException event handler is executed

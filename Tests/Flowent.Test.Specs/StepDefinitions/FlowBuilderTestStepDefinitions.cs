@@ -14,40 +14,51 @@ namespace Flowent.Test.Specs.StepDefinitions
             _flowBuilderDriver = flowBuilderDriver;
             _flowBuilderDriver.Create();
         }
-
-
-        [Given(@"define initialization for the created FlowBuilder instance")]
-        public void GivenInitializeTheCreatedInstance()
+         
+        [Given(@"initialization step is defined for the FlowBuilder instance")]
+        public void GivenInitializationStepIsDefinedForTheFlowBuilderInstance()
         {
             _flowBuilderDriver.DefineInitialization();
         }
 
-        [Given(@"define some validation for the created FlowBuilder instance")]
-        public void GivenDefineSomeValidationForTheCreatedFlowBuilderInstance()
+        [Given(@"some validations are defined for the created FlowBuilder instance")]
+        public void GivenSomeValidationsAreDefinedForTheCreatedFlowBuilderInstance()
         {
             _flowBuilderDriver.DefineValidValidation();
         }
-
-        [Given(@"define some invalid validation for the created FlowBuilder instance")]
-        public void GivenDefineSomeInvalidValidationForTheCreatedFlowBuilderInstance()
+        
+        [Given(@"some invalid validations are defined for the created FlowBuilder instance")]
+        public void GivenSomeInvalidValidationsAreDefinedForTheCreatedFlowBuilderInstance()
         {
             _flowBuilderDriver.DefineInValidValidation();
         }
 
-        [Given(@"define an onExecuted event handler")]
-        public void GivenDefineAnOnExecutedEventHandler()
+
+        [Given(@"an onExecuted event handler is defined")]
+        public void GivenAnOnExecutedEventHandlerIsDefined()
         {
             _flowBuilderDriver.DefineOnExecutedHandler();
         }
 
 
+        [Given(@"an Exception handler is defined")]
+        public void GivenAnExceptionHandlerIsDefined()
+        {
+            _flowBuilderDriver.DefineOnExceptionHandler();
+        }
 
+        [Given(@"test command is Initialized in a way that causes an error")]
+        public void GivenTestCommandIsInitializedInAWayThatCausesAnError()
+        {
+            _flowBuilderDriver.InitializeCommandToThrowException();
+        }
 
-        [When(@"run flow instance of FlowBuilder<TestCommand>")]
-        public void WhenRunFlowInstanceOfFlowBuilderTestCommand()
+        [When(@"running the FlowBuilder<TestCommand> instance")]
+        public void WhenRunningTheFlowBuilderTestCommandInstance()
         {
             _flowBuilderDriver.RunFlow();
         }
+         
 
         [Then(@"the TestCommand should be initialized")]
         public void ThenTheTestCommandShouldBeInitializedBeforeExecution()
@@ -85,6 +96,12 @@ namespace Flowent.Test.Specs.StepDefinitions
         public void ThenCheckIfTheOnExecutedEventHandlerIsExecuted()
         {
             _flowBuilderDriver.IsOnExecutedHandlerExectured().Should().BeTrue();
+        }
+
+        [Then(@"check if the onException event handler is executed")]
+        public void ThenCheckIfTheOnExceptionEventHandlerIsExecuted()
+        {
+            _flowBuilderDriver.IsOnExceptionHandlerExecuted().Should().BeTrue();
         }
 
 

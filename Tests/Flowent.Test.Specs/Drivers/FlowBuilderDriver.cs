@@ -1,8 +1,12 @@
-﻿using Microsoft.VisualStudio.TestPlatform.Utilities;
+﻿using Flowent.Exceptions;
+using Microsoft.CSharp.RuntimeBinder;
+using Microsoft.VisualStudio.TestPlatform.Utilities;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Security.Cryptography;
+using System.Security.Policy;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -20,23 +24,27 @@ namespace Flowent.Test.Specs.Drivers
         };
 
         public FlowBuilder<TestCommand> FlowInstance { get; private set; }
-        public TestCommand CommandInstance { get; private set; }
-        public AggregateException? RunException { get; private set; }
+        public TestCommand? CommandInstance { get; private set; }
+        public ValidatorException? ValidationException { get; private set; }
+        public Exception? ExecutionException { get; set; }
 
         public FlowBuilder<TestCommand> Create() => FlowInstance = new FlowBuilder<TestCommand>();
 
 
 
-        public async void RunFlow(bool rethrowException = false)
+        public async void RunFlow()
         {
             try
             {
                 CommandInstance = await FlowInstance.Run();
             }
-            catch (AggregateException ex)
+            catch (ValidatorException ex)
             {
-                RunException = ex;
-                if (rethrowException) throw;
+                ValidationException = ex;
+            }
+            catch (Exception ex)
+            {
+                ExecutionException = ex;
             }
         }
 
@@ -65,6 +73,7 @@ namespace Flowent.Test.Specs.Drivers
                    .IfIsNot(cmd => cmd.Status == "Some Value").Throw(cmd => new Exception("Status must be 'Some Value'"))
                    .If(cmd => cmd.Status == "Invalid Status Value").Throw(cmd => new Exception("Status can not be 'Invalid Status Value'"));
 
+        // On Executed
         public void DefineOnExecutedHandler() => FlowInstance.On
             .ExecutedAsync(cmd => cmd.Status = "OnExecuted hanlder result",
                        cmd => cmd.IntProp = 100);
@@ -74,12 +83,23 @@ namespace Flowent.Test.Specs.Drivers
             CommandInstance.IntProp == 100 &&
             CommandInstance.Output == $"0 - "; // Output field's value will change in execution function while we are changing the values in OnExecuted event
 
-
-
         public bool IsInvalidated() =>
-            RunException != null &&
-            RunException.InnerExceptions.Any(e => e.Message == "Status must be 'Some Value'") &&
-            RunException.InnerExceptions.Any(e => e.Message == "Status can not be 'Invalid Status Value'");
+            ValidationException != null &&
+            ValidationException.InnerExceptions.Any(e => e.Message == "Status must be 'Some Value'") &&
+            ValidationException.InnerExceptions.Any(e => e.Message == "Status can not be 'Invalid Status Value'");
+
+
+        // On Exception
+        public bool OnExceptionHandlerExecuted = false;
+        public void DefineOnExceptionHandler() => FlowInstance.On
+            .Exception<ApplicationException>((cmd, ex) => {
+                OnExceptionHandlerExecuted = true;
+                return Task.CompletedTask;
+            });
+        public void InitializeCommandToThrowException() => FlowInstance.Init
+            .By(cmd => cmd.ThrowException = true);
+        
+        public bool IsOnExceptionHandlerExecuted() => OnExceptionHandlerExecuted;
 
 
         public FlowBuilder GetSampleFlowBuilder()
@@ -114,7 +134,7 @@ namespace Flowent.Test.Specs.Drivers
             return command;
         }
 
-
+        
     }
 
     public class SomeContext
@@ -127,20 +147,23 @@ namespace Flowent.Test.Specs.Drivers
 
     public class TestCommand : ICommand
     {
-        // INPUT/OUTPUT value
+        public bool ThrowException { get; set; } = false;
+
         public int IntProp { get; set; }
-
-        // INPUT value
+        
         public string Status { get; set; }
-
-        // OUTPUT value
+        
         public string Output { get; private set; }
-
-        // OUTPUT value
+        
         public string Message => $"Here is Test Command with output {Output}";
+
+
 
         public Task Execute()
         {
+            if (ThrowException)
+                throw new ApplicationException();
+
             Output = $"{IntProp} - {Status}";
             return Task.CompletedTask;
         }
