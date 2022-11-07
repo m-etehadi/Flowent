@@ -12,7 +12,7 @@ namespace Flowent
         Func<TCommand, Exception>? _action;
 
 
-        public ValidatorAction(Validator<TCommand> validator)
+        internal ValidatorAction(Validator<TCommand> validator)
         {
             _validator = validator;
         }
@@ -26,7 +26,7 @@ namespace Flowent
 
         public Validator<TCommand> Throw(Func<TCommand, Exception> action) => Throw<Exception>(action);
 
-        public Exception Run(TCommand cmd) => _action?.Invoke(cmd) ?? throw new Exception("Invalid ValidatorAction instance. Specify a valid action for current VlidatorAction instance.");
+        internal Exception Run(TCommand cmd) => _action?.Invoke(cmd) ?? throw new Exception("Invalid ValidatorAction instance. Specify a valid action for current VlidatorAction instance.");
         
     }
 }

@@ -32,7 +32,7 @@ namespace Flowent.Test.Specs.Drivers
 
 
 
-        public async void RunFlow()
+        public async Task RunFlow()
         {
             try
             {
@@ -92,14 +92,49 @@ namespace Flowent.Test.Specs.Drivers
         // On Exception
         public bool OnExceptionHandlerExecuted = false;
         public void DefineOnExceptionHandler() => FlowInstance.On
-            .Exception<ApplicationException>((cmd, ex) => {
+            .Exception<ApplicationException>((cmd, ex) =>
+            {
                 OnExceptionHandlerExecuted = true;
                 return Task.CompletedTask;
             });
         public void InitializeCommandToThrowException() => FlowInstance.Init
             .By(cmd => cmd.ThrowException = true);
-        
+
         public bool IsOnExceptionHandlerExecuted() => OnExceptionHandlerExecuted;
+
+
+
+
+        // IF condtion
+
+        bool _executedValidIfConditionHandler, _executedInvalidIfConditionHandler = false;
+        bool _executedElseConditionHandler = false;
+        public void DefineValidIfConditionHandler() => FlowInstance
+            .If(cmd => true).Do<TestCommand2>(new FlowBuilder<TestCommand2>()
+                                              .On
+                                                  .ExecutedAsync(cmd => _executedValidIfConditionHandler = true)
+                                              .EndOn);
+
+        public void DefineInvalidIfConditionHandler() => FlowInstance
+            .If(cmd => true).Do<TestCommand2>(new FlowBuilder<TestCommand2>()
+                                      .On
+                                          .ExecutedAsync(cmd => _executedInvalidIfConditionHandler = true)
+                                      .EndOn);
+
+        public void DefineElseConditionHandler() => FlowInstance
+                .If(cmd => false).Do<TestCommand2>(new FlowBuilder<TestCommand2>())
+                .ElseIf(cmd=> true).Do<TestCommand2>(new FlowBuilder<TestCommand2>()
+                                              .On
+                                                  .ExecutedAsync(cmd => _executedElseConditionHandler = true)
+                                              .EndOn);
+        public bool IsValidIfConditionHandlerExecuted() => _executedValidIfConditionHandler;
+
+        public bool IsInvalidIfConditionHandlerExecuted() => _executedInvalidIfConditionHandler;
+
+        public bool IsElseConditionHandlerExecuted() => _executedElseConditionHandler;
+
+
+
 
 
         public FlowBuilder GetSampleFlowBuilder()
@@ -134,7 +169,7 @@ namespace Flowent.Test.Specs.Drivers
             return command;
         }
 
-        
+
     }
 
     public class SomeContext
@@ -150,11 +185,11 @@ namespace Flowent.Test.Specs.Drivers
         public bool ThrowException { get; set; } = false;
 
         public int IntProp { get; set; }
-        
+
         public string Status { get; set; }
-        
+
         public string Output { get; private set; }
-        
+
         public string Message => $"Here is Test Command with output {Output}";
 
 

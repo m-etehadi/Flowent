@@ -29,3 +29,12 @@ Scenario: Test onException event handler
 	* test command is Initialized in a way that causes an error
 	When running the FlowBuilder<TestCommand> instance
 	Then check if the onException event handler is executed
+
+Scenario: Test IF-Else condition handler
+	Given an IF-Condition handler with valid condition
+	* an IF-Condition handler with invalid condition
+	* an Else handler is defined
+	When running the FlowBuilder<TestCommand> instance
+	Then check if the valid condition handler is executed
+	* check if the invalid condition handler is not executed
+	* check if the else hanlder is executed

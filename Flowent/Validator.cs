@@ -40,7 +40,7 @@ namespace Flowent
             return validatorActionPair.Action;
         }
 
-        public AggregateException? Run(TCommand cmd)
+        internal AggregateException? Run(TCommand cmd)
         {
             List<Exception> resultIsNotValidators = _validatorsIsNot.Where(p => p.Validators.Any(validator => validator(cmd) == false))
                 .Select(p => p.Action.Run(cmd))

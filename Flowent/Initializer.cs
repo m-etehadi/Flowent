@@ -12,7 +12,7 @@ namespace Flowent
         readonly FlowBuilder<TCommand> _currentCommandBuilder;
 
         // Methods
-        public Initializer(FlowBuilder<TCommand> currentCommandBuilder)
+        internal Initializer(FlowBuilder<TCommand> currentCommandBuilder)
         {
             _currentCommandBuilder = currentCommandBuilder;
             _actionInitializer = () => new TCommand();

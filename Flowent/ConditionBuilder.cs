@@ -10,26 +10,26 @@ namespace Flowent
     {
         ConditionBuilder<TCommand>? _else;
         FlowBuilder<TCommand> _currentAction;
-        FlowBuilder _doAction;
+        List<FlowBuilder> _doActions;
         Func<TCommand, Task<bool>> _condition;
 
 
 
-        public ConditionBuilder(FlowBuilder<TCommand> currentAction, Func<TCommand, Task<bool>> condition)
+        internal ConditionBuilder(FlowBuilder<TCommand> currentAction, Func<TCommand, Task<bool>> condition)
         {
             _currentAction = currentAction;
             _condition = condition;
+            _doActions = new List<FlowBuilder>();
         }
 
         public ConditionBuilder<TCommand> Do<NextCommand>(FlowBuilder<NextCommand> nextCommand) where NextCommand : ICommand, new()
         {
-            _doAction = nextCommand;
+            _doActions.Add(nextCommand);
             return this;
         }
 
         public ConditionBuilder<TCommand> ElseIf(Func<TCommand, bool> condition)
         {
-            // Implement Else<NextCommand>() by combination of ElseIf(true) and Do()
             Func<TCommand, Task<bool>> asyncCondition = command => Task.Run(() => condition(command));
             return this._else = new ConditionBuilder<TCommand>(_currentAction, asyncCondition);
         }
@@ -38,10 +38,10 @@ namespace Flowent
         public FlowBuilder<TCommand> EndThen => EndIf;
 
 
-        public async Task Run(TCommand commandInstance)
+        internal async Task Run(TCommand commandInstance)
         {
             if (await _condition(commandInstance))
-                await _doAction.Run();
+                await Task.WhenAll(_doActions.Select(p => p.Run()));
             else if (_else != null)
                 await _else.Run(commandInstance);
         }

@@ -53,10 +53,31 @@ namespace Flowent.Test.Specs.StepDefinitions
             _flowBuilderDriver.InitializeCommandToThrowException();
         }
 
-        [When(@"running the FlowBuilder<TestCommand> instance")]
-        public void WhenRunningTheFlowBuilderTestCommandInstance()
+
+        [Given(@"an IF-Condition handler with valid condition")]
+        public void GivenAnIF_ConditionHandlerWithValidCondition()
         {
-            _flowBuilderDriver.RunFlow();
+            _flowBuilderDriver.DefineValidIfConditionHandler();
+        }
+
+        [Given(@"an IF-Condition handler with invalid condition")]
+        public void GivenAnIF_ConditionHandlerWithInvalidCondition()
+        {
+            _flowBuilderDriver.DefineInvalidIfConditionHandler();
+        }
+
+        [Given(@"an Else handler is defined")]
+        public void GivenAnElseHandlerIsDefined()
+        {
+            _flowBuilderDriver.DefineElseConditionHandler();
+        }
+
+
+
+        [When(@"running the FlowBuilder<TestCommand> instance")]
+        public async void WhenRunningTheFlowBuilderTestCommandInstance()
+        {
+            await _flowBuilderDriver.RunFlow();
         }
          
 
@@ -104,6 +125,23 @@ namespace Flowent.Test.Specs.StepDefinitions
             _flowBuilderDriver.IsOnExceptionHandlerExecuted().Should().BeTrue();
         }
 
+        [Then(@"check if the valid condition handler is executed")]
+        public void ThenCheckIfTheValidConditionHandlerIsExecuted()
+        {
+            _flowBuilderDriver.IsValidIfConditionHandlerExecuted().Should().BeTrue();
+        }
+
+        [Then(@"check if the invalid condition handler is not executed")]
+        public void ThenCheckIfTheInvalidConditionHandlerIsNotExecuted()
+        {
+            _flowBuilderDriver.IsInvalidIfConditionHandlerExecuted().Should().BeTrue();
+        }
+
+        [Then(@"check if the else hanlder is executed")]
+        public void ThenCheckIfTheElseHanlderIsExecuted()
+        {
+            _flowBuilderDriver.IsElseConditionHandlerExecuted().Should().BeTrue();
+        }
 
     }
 }
