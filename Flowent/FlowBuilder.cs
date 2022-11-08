@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Flowent.Command;
 
 namespace Flowent
 {
@@ -61,7 +62,7 @@ namespace Flowent
 
         public override async Task<TCommand> Run()
         {
-            var commandInstance = Init.Run();
+            var commandInstance = await Init.Run();
 
             // validate
             var validatorException = _validators.Run(commandInstance);
@@ -78,6 +79,6 @@ namespace Flowent
 
             return commandInstance;
 
-        }
+        }        
     }
 }

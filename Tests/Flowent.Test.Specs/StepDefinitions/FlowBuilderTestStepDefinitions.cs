@@ -70,16 +70,21 @@ namespace Flowent.Test.Specs.StepDefinitions
         public void GivenAnElseHandlerIsDefined()
         {
             _flowBuilderDriver.DefineElseConditionHandler();
-        }
-
+        }        
 
 
         [When(@"running the FlowBuilder<TestCommand> instance")]
-        public async void WhenRunningTheFlowBuilderTestCommandInstance()
+        public void WhenRunningTheFlowBuilderTestCommandInstance()
         {
-            await _flowBuilderDriver.RunFlow();
+            _flowBuilderDriver.RunConfiguredFlowInstance().Wait();
         }
-         
+
+        [When(@"running ICommandInitializer's instance")]
+        public void WhenRunningICommandInitializersInstance()
+        {
+            _flowBuilderDriver.RunEmbeddedHandlersFlowInstance().Wait();
+        }
+
 
         [Then(@"the TestCommand should be initialized")]
         public void ThenTheTestCommandShouldBeInitializedBeforeExecution()
@@ -141,6 +146,12 @@ namespace Flowent.Test.Specs.StepDefinitions
         public void ThenCheckIfTheElseHanlderIsExecuted()
         {
             _flowBuilderDriver.IsElseConditionHandlerExecuted().Should().BeTrue();
+        }
+
+        [Then(@"check if the embedded initializer is executed")]
+        public void ThenCheckIfTheEmbeddedInitializerIsExecuted()
+        {
+            _flowBuilderDriver.IsEmbededInitializationStepExecutedAtFirst().Should().BeTrue();
         }
 
     }

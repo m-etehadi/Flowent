@@ -3,27 +3,29 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Flowent.Command;
 
 namespace Flowent
 {
     public class Initializer<TCommand> where TCommand : ICommand, new()
     {
-        Func<TCommand> _actionInitializer;
+        Func<Task<TCommand>> _actionInitializer;
         readonly FlowBuilder<TCommand> _currentCommandBuilder;
 
         // Methods
         internal Initializer(FlowBuilder<TCommand> currentCommandBuilder)
         {
             _currentCommandBuilder = currentCommandBuilder;
-            _actionInitializer = () => new TCommand();
+            _actionInitializer = () => Task.Run<TCommand>(() => new TCommand());
         }
 
         public FlowBuilder<TCommand> By(params Action<TCommand>[] initializers)
         {
-            this._actionInitializer = () =>
+            this._actionInitializer = async () =>
             {
                 var result = new TCommand();
-                initializers.ToList().ForEach(p => p.Invoke(result));
+                var initializersInvokes = initializers.ToList().Select(p => Task.Run(() => p(result)));
+                await Task.WhenAll(initializersInvokes);
                 return result;
             };
 
@@ -32,10 +34,22 @@ namespace Flowent
 
         public FlowBuilder<TCommand> By(Func<TCommand> initializer)
         {
-            this._actionInitializer = initializer;
+            this._actionInitializer = () => Task.Run<TCommand>(() => initializer());
             return _currentCommandBuilder;
         }
 
-        internal TCommand Run() => _actionInitializer();
+        internal async Task<TCommand> Run()
+        {
+            var command = await _actionInitializer();
+            await runCommandInitializer(command);
+            return command;
+        }
+
+        private async Task runCommandInitializer(TCommand command)
+        {
+            var commandInitializer = command as ICommandInitializer;
+            if (commandInitializer != null)
+                await commandInitializer.Initialize();
+        }
     }
 }

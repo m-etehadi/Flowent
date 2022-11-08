@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Flowent.Command;
 
 namespace Flowent.Samples.Basic.Commands
 {
@@ -18,6 +19,7 @@ namespace Flowent.Samples.Basic.Commands
             return Task.CompletedTask;
         }
 
+        public void Init() { }
         public void OnExecuted() { }
 
         public void OnExecuting() { }
