@@ -14,7 +14,7 @@ namespace Flowent.Test.Specs.StepDefinitions
             _flowBuilderDriver = flowBuilderDriver;
             _flowBuilderDriver.Create();
         }
-         
+
         [Given(@"initialization step is defined for the FlowBuilder instance")]
         public void GivenInitializationStepIsDefinedForTheFlowBuilderInstance()
         {
@@ -26,14 +26,14 @@ namespace Flowent.Test.Specs.StepDefinitions
         {
             _flowBuilderDriver.DefineValidValidation();
         }
-        
+
         [Given(@"some invalid validations are defined for the created FlowBuilder instance")]
         public void GivenSomeInvalidValidationsAreDefinedForTheCreatedFlowBuilderInstance()
         {
             _flowBuilderDriver.DefineInValidValidation();
         }
 
-
+     
         [Given(@"an onExecuted event handler is defined")]
         public void GivenAnOnExecutedEventHandlerIsDefined()
         {
@@ -70,7 +70,7 @@ namespace Flowent.Test.Specs.StepDefinitions
         public void GivenAnElseHandlerIsDefined()
         {
             _flowBuilderDriver.DefineElseConditionHandler();
-        }        
+        }
 
 
         [When(@"running the FlowBuilder<TestCommand> instance")]
@@ -79,10 +79,18 @@ namespace Flowent.Test.Specs.StepDefinitions
             _flowBuilderDriver.RunConfiguredFlowInstance().Wait();
         }
 
-        [When(@"running ICommandInitializer's instance")]
-        public void WhenRunningICommandInitializersInstance()
+        [When(@"running a command that implemented ICommandInitializer")]
+        public void WhenRunningACommandThatImplementedICommandInitializer()
         {
             _flowBuilderDriver.RunEmbeddedHandlersFlowInstance().Wait();
+        }
+
+        [When(@"running an invalid command that implemented ICommandValidator")]
+        public void WhenRunningAnInvalidCommandThatImplementedICommandValidator()
+        {
+            _flowBuilderDriver
+                .RunEmbeddedHandlersFlowInstance(new TestCommandEmbeddedSteps() { IsValid1 = false, IsValid2 = false })
+                .Wait();
         }
 
 
@@ -152,6 +160,12 @@ namespace Flowent.Test.Specs.StepDefinitions
         public void ThenCheckIfTheEmbeddedInitializerIsExecuted()
         {
             _flowBuilderDriver.IsEmbededInitializationStepExecutedAtFirst().Should().BeTrue();
+        }
+
+        [Then(@"check if the embedded validator is executed")]
+        public void ThenCheckIfTheEmbeddedValidatorIsExecuted()
+        {
+            _flowBuilderDriver.IsEmbededValidatorExectured().Should().BeTrue();
         }
 
     }

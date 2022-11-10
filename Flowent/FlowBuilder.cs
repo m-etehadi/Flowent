@@ -10,7 +10,7 @@ namespace Flowent
 {
     public abstract class FlowBuilder
     {
-        public abstract Task Run();
+        public abstract Task Run(ICommand? cmd = default);
     }
 
     public class FlowBuilder<TCommand> : FlowBuilder where TCommand : ICommand, new()
@@ -60,12 +60,15 @@ namespace Flowent
             return conditionalNextAction;
         }
 
-        public override async Task<TCommand> Run()
+        public override async Task<TCommand> Run(ICommand? cmd = default)
         {
-            var commandInstance = await Init.Run();
+            if (cmd != default && !cmd.GetType().Equals(typeof(TCommand)))
+                throw new Exception($"Provided invalid command type: {cmd.GetType().FullName}");
+
+            var commandInstance = await Init.Run((TCommand?)cmd);
 
             // validate
-            var validatorException = _validators.Run(commandInstance);
+            var validatorException = await _validators.Run(commandInstance);
             if (validatorException != null)
             {
                 throw validatorException;
@@ -79,6 +82,6 @@ namespace Flowent
 
             return commandInstance;
 
-        }        
+        }
     }
 }

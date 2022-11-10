@@ -41,5 +41,9 @@ Scenario: Test IF-Else condition handler
 	* check if the else hanlder is executed
 
 Scenario: Test Embeded Initializer handler	
-	When running ICommandInitializer's instance
+	When running a command that implemented ICommandInitializer
 	Then check if the embedded initializer is executed
+
+Scenario: Test Embeded Validator handler	
+	When running an invalid command that implemented ICommandValidator
+	Then check if the embedded validator is executed

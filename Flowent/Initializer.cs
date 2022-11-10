@@ -9,24 +9,24 @@ namespace Flowent
 {
     public class Initializer<TCommand> where TCommand : ICommand, new()
     {
-        Func<Task<TCommand>> _actionInitializer;
+        Func<TCommand?, Task<TCommand>> _actionInitializer;
         readonly FlowBuilder<TCommand> _currentCommandBuilder;
 
         // Methods
         internal Initializer(FlowBuilder<TCommand> currentCommandBuilder)
         {
             _currentCommandBuilder = currentCommandBuilder;
-            _actionInitializer = () => Task.Run<TCommand>(() => new TCommand());
+            _actionInitializer = cmd => Task.Run<TCommand>(() => cmd ?? new TCommand());
         }
 
         public FlowBuilder<TCommand> By(params Action<TCommand>[] initializers)
         {
-            this._actionInitializer = async () =>
+            this._actionInitializer = async cmd =>
             {
-                var result = new TCommand();
-                var initializersInvokes = initializers.ToList().Select(p => Task.Run(() => p(result)));
+                cmd ??= new TCommand();
+                var initializersInvokes = initializers.ToList().Select(p => Task.Run(() => p(cmd)));
                 await Task.WhenAll(initializersInvokes);
-                return result;
+                return cmd;
             };
 
             return _currentCommandBuilder;
@@ -34,13 +34,19 @@ namespace Flowent
 
         public FlowBuilder<TCommand> By(Func<TCommand> initializer)
         {
-            this._actionInitializer = () => Task.Run<TCommand>(() => initializer());
+            this._actionInitializer = cmd => Task.Run<TCommand>(() => initializer());
             return _currentCommandBuilder;
         }
 
-        internal async Task<TCommand> Run()
+        public FlowBuilder<TCommand> By(Func<TCommand?, TCommand> initializer)
         {
-            var command = await _actionInitializer();
+            this._actionInitializer = cmd => Task.Run<TCommand>(() => initializer(cmd));
+            return _currentCommandBuilder;
+        }
+
+        internal async Task<TCommand> Run(TCommand? cmd = default)
+        {
+            var command = await _actionInitializer(cmd);
             await runCommandInitializer(command);
             return command;
         }

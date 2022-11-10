@@ -22,7 +22,7 @@ namespace Flowent.Test.Specs.Drivers
         public TestCommand1? CommandInstance { get; private set; }
         public TestCommandEmbeddedSteps? CommandWithEmbededSteps { get; private set; }
 
-        public ValidatorException? ValidationException { get; private set; }
+        public AggregateException? ValidationException { get; private set; }
         public Exception? ExecutionException { get; set; }
 
         public FlowBuilder<TestCommand1> Create() => ConfiguredFlowInstance = new FlowBuilder<TestCommand1>();
@@ -34,19 +34,20 @@ namespace Flowent.Test.Specs.Drivers
             CommandInstance = await RunFlowInstance<TestCommand1>(ConfiguredFlowInstance);
         }
 
-        public async Task RunEmbeddedHandlersFlowInstance()
+        public async Task RunEmbeddedHandlersFlowInstance(ICommand? cmd = default)
         {
-            CommandWithEmbededSteps = await new FlowBuilder<TestCommandEmbeddedSteps>().Run();
+            var embededHandlersFlowBuilder = new FlowBuilder<TestCommandEmbeddedSteps>();
+            CommandWithEmbededSteps = await RunFlowInstance<TestCommandEmbeddedSteps>(embededHandlersFlowBuilder, cmd);
         }
 
-        public async Task<TCommand> RunFlowInstance<TCommand>(FlowBuilder<TCommand> flowBuilder) 
+        public async Task<TCommand> RunFlowInstance<TCommand>(FlowBuilder<TCommand> flowBuilder, ICommand? cmd = default)
             where TCommand : ICommand, new()
         {
             try
             {
-                return await flowBuilder.Run();
+                return await flowBuilder.Run(cmd);
             }
-            catch (ValidatorException ex)
+            catch (AggregateException ex)
             {
                 ValidationException = ex;
             }
@@ -58,7 +59,7 @@ namespace Flowent.Test.Specs.Drivers
             return await Task.FromResult<TCommand>(default);
         }
 
-       
+
 
 
 
@@ -70,7 +71,10 @@ namespace Flowent.Test.Specs.Drivers
         #region Initialization Step
 
         public void DefineInitialization() => ConfiguredFlowInstance.Init.By(cmd => cmd.IntProp = 2, p => p.Status = "3");
-        public bool IsInitialized() => CommandInstance.IntProp == 2 && CommandInstance.Status == "3";
+        public bool IsInitialized() => 
+            CommandInstance!= null && 
+            CommandInstance.IntProp == 2 && 
+            CommandInstance.Status == "3";
 
         #endregion
 
@@ -79,7 +83,7 @@ namespace Flowent.Test.Specs.Drivers
         public void DefineValidValidation() => ConfiguredFlowInstance.Validate
                     .IfIsNot(cmd => cmd.Status == "3").Throw(cmd => new Exception("Status must be '3'"))
                     .If(cmd => cmd.Status == "1").Throw(cmd => new Exception("Status can not be '1'"));
-        public bool IsValidated() => CommandInstance.Status == "3" && CommandInstance.Status != "1";
+        public bool IsValidated() => CommandInstance!.Status == "3" && CommandInstance.Status != "1";
 
         public void DefineInValidValidation() => ConfiguredFlowInstance.Validate
                    .IfIsNot(cmd => cmd.Status == "Some Value").Throw(cmd => new Exception("Status must be 'Some Value'"))
@@ -151,12 +155,18 @@ namespace Flowent.Test.Specs.Drivers
         #region Embedded Initialization Step
 
 
-        //internal void DefineAnInstanceOfICommandInitializer() => _commandWithEmbededSteps = new TestCommandEmbeddedSteps();
-
         internal bool IsEmbededInitializationStepExecutedAtFirst() =>
                 CommandWithEmbededSteps != null &&
                 CommandWithEmbededSteps.ExecutionTracks.OrderBy(p => p.Time).First().MethodName == nameof(CommandWithEmbededSteps.Initialize) &&
                 CommandWithEmbededSteps.ExecutionTracks.OrderBy(p => p.Time).Any(p => p.MethodName == nameof(CommandWithEmbededSteps.Execute));
+
+        #endregion
+
+        #region Embeded Validator Step
+        internal bool IsEmbededValidatorExectured() =>
+                ValidationException != null &&
+                ValidationException.InnerExceptions.Any(p => p.HResult == 1) &&
+                ValidationException.InnerExceptions.Any(p => p.HResult == 2);
 
         #endregion
     }
