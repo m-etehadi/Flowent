@@ -26,12 +26,21 @@ namespace Flowent
             }
             catch (Exception exception)
             {
-                await Task.WhenAll(
-                   _onException
-                   .Where(e => e.exceptionType.IsAssignableFrom(exception.GetType()))
-                   .Select(e => e.handler(commandInstance, exception))
-               );
+                var exceptionHandlers = _onException.Where(e => e.exceptionType.IsAssignableFrom(exception.GetType())).Select(e => e.handler(commandInstance, exception))
+                                 .Union(embeddedExceptions(commandInstance).Select(p => p(commandInstance, exception)));
+
+                await Task.WhenAll(exceptionHandlers);
             }
+        }
+
+        private List<Func<TCommand, Exception, Task>> embeddedExceptions(TCommand cmdInstance)
+        {
+            List<Func<TCommand, Exception, Task>> result = new();
+            ICommandExceptionHandler? cmdInstanceCommandHandler = cmdInstance as ICommandExceptionHandler;
+            if (cmdInstanceCommandHandler != null)
+                result.Add((TCommand command, Exception ex) => cmdInstanceCommandHandler.ExceptionHandler(ex));
+
+            return result;
         }
 
         internal Event(FlowBuilder<TCommand> currentAction)

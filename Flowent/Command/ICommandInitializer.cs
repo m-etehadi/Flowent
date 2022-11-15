@@ -4,10 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Flowent.Command
+namespace Flowent.Command;
+
+public interface ICommandInitializer
 {
-    public interface ICommandInitializer
-    {
-        Task Initialize();
-    }
+    Task Initialize();
 }

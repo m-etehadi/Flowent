@@ -12,7 +12,6 @@ namespace Flowent.Test.Specs.StepDefinitions
         public FlowBuilderTestStepDefinitions(FlowBuilderDriver flowBuilderDriver)
         {
             _flowBuilderDriver = flowBuilderDriver;
-            _flowBuilderDriver.Create();
         }
 
         [Given(@"initialization step is defined for the FlowBuilder instance")]
@@ -33,7 +32,7 @@ namespace Flowent.Test.Specs.StepDefinitions
             _flowBuilderDriver.DefineInValidValidation();
         }
 
-     
+
         [Given(@"an onExecuted event handler is defined")]
         public void GivenAnOnExecutedEventHandlerIsDefined()
         {
@@ -93,6 +92,13 @@ namespace Flowent.Test.Specs.StepDefinitions
                 .Wait();
         }
 
+        [When(@"running an invalid command that implemented ICommandExceptionHandler")]
+        public void WhenRunningAnInvalidCommandThatImplementedICommandExceptionHandler()
+        {
+            _flowBuilderDriver
+                .RunEmbeddedHandlersFlowInstance(new TestCommandEmbeddedSteps() { ThrowExceptionOnExcution = true })
+                .Wait();
+        }
 
         [Then(@"the TestCommand should be initialized")]
         public void ThenTheTestCommandShouldBeInitializedBeforeExecution()
@@ -166,6 +172,12 @@ namespace Flowent.Test.Specs.StepDefinitions
         public void ThenCheckIfTheEmbeddedValidatorIsExecuted()
         {
             _flowBuilderDriver.IsEmbededValidatorExectured().Should().BeTrue();
+        }
+
+        [Then(@"check if the embedded exception handler is executed")]
+        public void ThenCheckIfTheEmbeddedExceptionHandlerIsExecuted()
+        {
+            _flowBuilderDriver.IsEmbededExceptionHandlerExectured().Should().BeTrue();
         }
 
     }

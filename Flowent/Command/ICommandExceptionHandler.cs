@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Flowent.Command;
 
-public interface ICommandValidator
+public interface ICommandExceptionHandler
 {
-    Task<AggregateException?> Validate();
+    Task ExceptionHandler(Exception exception);
 }

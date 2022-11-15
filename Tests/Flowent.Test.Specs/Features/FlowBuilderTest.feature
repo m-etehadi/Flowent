@@ -47,3 +47,7 @@ Scenario: Test Embeded Initializer handler
 Scenario: Test Embeded Validator handler	
 	When running an invalid command that implemented ICommandValidator
 	Then check if the embedded validator is executed
+
+Scenario: Test Embeded Exception handler	
+	When running an invalid command that implemented ICommandExceptionHandler
+	Then check if the embedded exception handler is executed

@@ -84,7 +84,7 @@ namespace Flowent
             var validationExceptions = resultIsValidators.Union(resultIsNotValidators).Where(p => p != null)
                                                                      .Cast<Exception>().ToList();
 
-            var icommandValidatorResult = await runCommandValidator(cmd);
+            var icommandValidatorResult = await runCommandEmbeddedValidators(cmd);
             if (icommandValidatorResult != null)
                 validationExceptions.AddRange(icommandValidatorResult.InnerExceptions);
 
@@ -92,7 +92,7 @@ namespace Flowent
         }
 
 
-        private async Task<AggregateException?> runCommandValidator(TCommand command)
+        private async Task<AggregateException?> runCommandEmbeddedValidators(TCommand command)
         {
             var commandValidator = command as ICommandValidator;
             if (commandValidator != null)
